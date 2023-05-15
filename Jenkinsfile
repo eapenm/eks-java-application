@@ -19,14 +19,14 @@ pipeline{
                }
             }
         }
-        // stage("Unit Testing using Maven"){
-        //     when {expression {params.action == 'create'}}
-        //     steps{
-        //        script{
-        //         mvnTest()
-        //        }
-        //     }
-        // }
+        stage("Unit Testing using Maven"){
+            when {expression {params.action == 'create'}}
+            steps{
+               script{
+                mvnTest()
+               }
+            }
+        }
         // stage("Integration Testing using Maven"){
         //     when {expression {params.action == 'create'}}
         //     steps{
