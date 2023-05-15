@@ -1,9 +1,5 @@
 @Library('eapen-shared-library') _
 pipeline{
-    agent any
-        environment {
-        JVM_ARGS = '-Xmx1024m --add-opens java.base/java.lang=ALL-UNNAMED'
-    }
     stages{
         stage("GIT Checkout"){
             steps{
@@ -17,7 +13,7 @@ pipeline{
         }
         stage('Build') {
             steps {
-                sh 'mvn clean compile -DskipTests=true -Dmaven.compiler.release=11 -Dmaven.compiler.args="--add-opens java.base/java.lang=ALL-UNNAMED"'
+                sh 'mvn clean compile'
             }
         }
         stage("Unit Testing using Maven"){
