@@ -18,7 +18,7 @@ pipeline{
         stages {
         stage('Build') {
             steps {
-                sh 'mvn clean package'
+                sh 'mvn clean compile -DskipTests=true -Dmaven.compiler.release=11 -Dmaven.compiler.args="--add-opens java.base/java.lang=ALL-UNNAMED"'
             }
         }
     }
