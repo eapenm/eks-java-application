@@ -12,7 +12,7 @@ pipeline{
                }
             }
         }
-        stage('BuildMaven Clean and Compile') {
+        stage('Build Maven Clean and Compile') {
             steps {
                 script{
                 mvnCleanCompile()
@@ -26,7 +26,7 @@ pipeline{
                }
             }
         }
-                stage("Unit Testing using Maven"){
+        stage("Integration Testing using Maven"){
             steps{
                script{
                 mvnIntegrationTest()
