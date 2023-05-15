@@ -1,6 +1,9 @@
 @Library('eapen-shared-library') _
 pipeline{
     agent any
+        environment {
+        JVM_ARGS = '-Xmx1024m --add-opens java.base/java.lang=ALL-UNNAMED'
+    }
     stages{
         stage("GIT Checkout"){
             steps{
@@ -12,6 +15,13 @@ pipeline{
                }
             }
         }
+        stages {
+        stage('Build') {
+            steps {
+                sh 'mvn clean package'
+            }
+        }
+    }
         stage("Unit Testing using Maven"){
             steps{
                script{
