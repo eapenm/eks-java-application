@@ -12,10 +12,10 @@ pipeline{
                }
             }
         }
-        stage('Build') {
+        stage('BuildMaven Clean and Compile') {
             steps {
                 script{
-                sh 'mvn clean compile'
+                mvnCleanCompile()
                 }
             }
         }
@@ -26,7 +26,15 @@ pipeline{
                }
             }
         }
+                stage("Unit Testing using Maven"){
+            steps{
+               script{
+                mvnIntegrationTest()
+               }
+            }
+        }
         
     }
 
 }
+
