@@ -45,21 +45,21 @@ pipeline{
             steps{
                script{
                    
-                   def SonarQubecredentialsId = 'sonar-token'
+                   def sonarQubecredentialsId = 'sonar-token'
                    staticCodeAnalysis(SonarQubecredentialsId)
                }
             }
         }
-        // stage('Quality Gate Status Check : Sonarqube'){
-        //  when { expression {  params.action == 'create' } }
-        //     steps{
-        //        script{
+        stage('Quality Gate Status Check : Sonarqube'){
+         when { expression {  params.action == 'create' } }
+            steps{
+               script{
                    
-        //            def SonarQubecredentialsId = 'sonar-token'
-        //            qualityGateStatus(SonarQubecredentialsId)
-        //        }
-        //     }
-        // }
+                   def sonarQubecredentialsId = 'sonar-token'
+                   qualityGateStatus(SonarQubecredentialsId)
+               }
+            }
+        }
         stage('Maven Build : maven'){
          when { expression {  params.action == 'create' } }
             steps{
