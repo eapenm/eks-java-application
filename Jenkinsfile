@@ -13,7 +13,7 @@ pipeline{
             steps{
                script{
                 gitCheckout(
-                    branch: 'main', 
+                    branch: 'devops', 
                     url: 'https://github.com/eapenm/eks-java-application.git'
                 )
                }
