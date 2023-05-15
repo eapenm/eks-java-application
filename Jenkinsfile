@@ -38,7 +38,7 @@ pipeline{
                script{
                    
                    def sonarQubecredentialsId = 'sonar-token'
-                   staticCodeAnalysis(SonarQubecredentialsId)
+                   staticCodeAnalysis(sonarQubecredentialsId)
                }
             }
         }
@@ -48,7 +48,7 @@ pipeline{
                script{
                    //Qulity gate status check
                    def sonarQubecredentialsId = 'sonar-token'
-                   qualityGateStatus(SonarQubecredentialsId)
+                   qualityGateStatus(sonarQubecredentialsId)
                }
             }
         }
