@@ -16,14 +16,6 @@ pipeline{
                }
             }
         }
-        stage('Build Maven Clean and Compile') {
-            when {expression {params.action == 'create'}}
-            steps {
-                script{
-                mvnCleanCompile()
-                }
-            }
-        }
         stage("Unit Testing using Maven"){
             when {expression {params.action == 'create'}}
             steps{
