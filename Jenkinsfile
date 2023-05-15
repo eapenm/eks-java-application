@@ -54,7 +54,7 @@ pipeline{
          when { expression {  params.action == 'create' } }
             steps{
                script{
-                   
+                   //Qulity gate status check
                    def sonarQubecredentialsId = 'sonar-token'
                    qualityGateStatus(SonarQubecredentialsId)
                }
