@@ -1,5 +1,6 @@
 @Library('eapen-shared-library') _
 pipeline{
+    agent any
     stages{
         stage("GIT Checkout"){
             steps{
@@ -13,7 +14,9 @@ pipeline{
         }
         stage('Build') {
             steps {
+                script{
                 sh 'mvn clean compile'
+                }
             }
         }
         stage("Unit Testing using Maven"){
