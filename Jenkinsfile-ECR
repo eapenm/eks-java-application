@@ -2,14 +2,14 @@
 pipeline{
     agent any
     parameters{
-        choice(name: 'action', choices: 'Create\ndelete', description: 'Choose create/Destroy')
+        choice(name: 'action', choices: 'Create\ndelete', description: 'Choose Create/Destroy')
         string(name: 'awsAccoutId',description: "AWS Account Id", defaultValue: '729398311642')
         string(name: 'region',description: "AWS region name where we need to deploy", defaultValue: 'us-east-1')
         string(name: 'ecrRepoName',description: "ECR Repository Name", defaultValue: 'javaapp')
     }
     stages{
         stage("GIT Checkout"){
-            when {expression {params.action == 'create'}}
+            when {expression {params.action == 'Create'}}
             steps{
                script{
                 gitCheckout(
@@ -20,7 +20,7 @@ pipeline{
             }
         }
         stage("Unit Testing using Maven"){
-            when {expression {params.action == 'create'}}
+            when {expression {params.action == 'Create'}}
             steps{
                script{
                 mvnTest()
@@ -28,7 +28,7 @@ pipeline{
             }
         }
         // stage("Integration Testing using Maven"){
-        //     when {expression {params.action == 'create'}}
+        //     when {expression {params.action == 'Create'}}
         //     steps{
         //        script{
         //         mvnIntegrationTest()
@@ -36,7 +36,7 @@ pipeline{
         //     }
         // }
         // stage('Static code analysis: Sonarqube'){
-        //  when { expression {  params.action == 'create' } }
+        //  when { expression {  params.action == 'Create' } }
         //     steps{
         //        script{
                    
@@ -46,7 +46,7 @@ pipeline{
         //     }
         // }
         // stage('Quality Gate Status Check : Sonarqube'){
-        //  when { expression {  params.action == 'create' } }
+        //  when { expression {  params.action == 'Create' } }
         //     steps{
         //        script{
         //            //Qulity gate status check
@@ -56,7 +56,7 @@ pipeline{
         //     }
         // }
         stage('Maven Build : maven'){
-         when { expression {  params.action == 'create' } }
+         when { expression {  params.action == 'Create' } }
             steps{
                script{
                    
@@ -65,7 +65,7 @@ pipeline{
             }
         }
         stage('Docker Image Build :ECR'){
-         when { expression {  params.action == 'create' } }
+         when { expression {  params.action == 'Create' } }
             steps{
                script{
                    
@@ -74,7 +74,7 @@ pipeline{
             }
         }
         stage('Docker Image Scan: trivy :ECR'){
-         when { expression {  params.action == 'create' } }
+         when { expression {  params.action == 'Create' } }
             steps{
                script{
                    
@@ -83,7 +83,7 @@ pipeline{
             }
         }
         stage('Docker Image Push : ECR '){
-         when { expression {  params.action == 'create' } }
+         when { expression {  params.action == 'Create' } }
             steps{
                script{
                    dockerImagePush("${params.awsAccoutId}", "${params.region}", "${params.ecrRepoName}")
@@ -91,7 +91,7 @@ pipeline{
             }
         }   
         stage('Docker Image clean : ECR '){
-         when { expression {  params.action == 'create' } }
+         when { expression {  params.action == 'Create' } }
             steps{
                script{
                    dockerImageCleanup("${params.awsAccoutId}", "${params.region}", "${params.ecrRepoName}")
