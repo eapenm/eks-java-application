@@ -106,11 +106,11 @@ pipeline{
          when { expression {  params.action == 'Create' } }
             steps{
                script{
-                   dir('terraform'){
+                   dir('eks_module'){
                     sh """
                        terraform init
-                       terraform plan -var 'access_key=$ACCESS_KEY' -var 'secret_key=$SECRET_KEY' -var 'region=${params.region}' 
-                       terraform apply -var 'access_key=$ACCESS_KEY' -var 'secret_key=$SECRET_KEY' -var 'region=${params.region}' -auto-approve
+                       terraform plan -var 'access_key=$ACCESS_KEY' -var 'secret_key=$SECRET_KEY' -var 'region=${params.region}' -var-file=./config/terraform.tfvars
+                       terraform apply -var 'access_key=$ACCESS_KEY' -var 'secret_key=$SECRET_KEY' -var 'region=${params.region}' -var-file=./config/terraform.tfvars -auto-approve
                     """
                    }
                   }
