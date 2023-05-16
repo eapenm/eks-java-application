@@ -109,8 +109,8 @@ pipeline{
                    dir('terraform'){
                     sh """
                        terraform init
-                       terraform plan -var 'access_key=$ACCESS_KEY' -var secret_key=$SECRET_KEY' -var='region=${params.region}' 
-                       terraform apply -var 'access_key=$ACCESS_KEY' -var secret_key=$SECRET_KEY' -var='region=${params.region}' -auto-approve
+                       terraform plan -var 'access_key=$ACCESS_KEY' -var 'secret_key=$SECRET_KEY' -var='region=${params.region}' 
+                       terraform apply -var 'access_key=$ACCESS_KEY' -var 'secret_key=$SECRET_KEY' -var='region=${params.region}' -auto-approve
                     """
                    }
                   }
