@@ -73,15 +73,15 @@ pipeline{
                }
             }
         }
-        stage('Docker Image Scan: trivy :ECR'){
-         when { expression {  params.action == 'Create' } }
-            steps{
-               script{
+        // stage('Docker Image Scan: trivy :ECR'){
+        //  when { expression {  params.action == 'Create' } }
+        //     steps{
+        //        script{
                    
-                   dockerImageScan("${params.awsAccoutId}", "${params.region}", "${params.ecrRepoName}")
-               }
-            }
-        }
+        //            dockerImageScan("${params.awsAccoutId}", "${params.region}", "${params.ecrRepoName}")
+        //        }
+        //     }
+        // }
         stage('Docker Image Push : ECR '){
          when { expression {  params.action == 'Create' } }
             steps{
