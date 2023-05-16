@@ -27,34 +27,34 @@ pipeline{
                }
             }
         }
-        // stage("Integration Testing using Maven"){
-        //     when {expression {params.action == 'Create'}}
-        //     steps{
-        //        script{
-        //         mvnIntegrationTest()
-        //        }
-        //     }
-        // }
-        // stage('Static code analysis: Sonarqube'){
-        //  when { expression {  params.action == 'Create' } }
-        //     steps{
-        //        script{
+        stage("Integration Testing using Maven"){
+            when {expression {params.action == 'Create'}}
+            steps{
+               script{
+                mvnIntegrationTest()
+               }
+            }
+        }
+        stage('Static code analysis: Sonarqube'){
+         when { expression {  params.action == 'Create' } }
+            steps{
+               script{
                    
-        //            def sonarQubecredentialsId = 'sonar-token'
-        //            staticCodeAnalysis(sonarQubecredentialsId)
-        //        }
-        //     }
-        // }
-        // stage('Quality Gate Status Check : Sonarqube'){
-        //  when { expression {  params.action == 'Create' } }
-        //     steps{
-        //        script{
-        //            //Qulity gate status check
-        //            def sonarQubecredentialsId = 'sonar-token'
-        //            qualityGateStatus(sonarQubecredentialsId)
-        //        }
-        //     }
-        // }
+                   def sonarQubecredentialsId = 'sonar-token'
+                   staticCodeAnalysis(sonarQubecredentialsId)
+               }
+            }
+        }
+        stage('Quality Gate Status Check : Sonarqube'){
+         when { expression {  params.action == 'Create' } }
+            steps{
+               script{
+                   //Qulity gate status check
+                   def sonarQubecredentialsId = 'sonar-token'
+                   qualityGateStatus(sonarQubecredentialsId)
+               }
+            }
+        }
         stage('Maven Build : maven'){
          when { expression {  params.action == 'Create' } }
             steps{
