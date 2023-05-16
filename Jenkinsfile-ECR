@@ -1,0 +1,102 @@
+@Library('eapen-shared-library') _
+pipeline{
+    agent any
+    parameters{
+        choice(name: 'action', choices: 'Create\ndelete', description: 'Choose create/Destroy')
+        string(name: 'awsAccoutId',description: "AWS Account Id", defaultValue: '729398311642')
+        string(name: 'region',description: "AWS region name where we need to deploy", defaultValue: 'us-east-1')
+        string(name: 'ecrRepoName',description: "ECR Repository Name", defaultValue: 'javaapp')
+    }
+    stages{
+        stage("GIT Checkout"){
+            when {expression {params.action == 'create'}}
+            steps{
+               script{
+                gitCheckout(
+                    branch: 'devops', 
+                    url: 'https://github.com/eapenm/eks-java-application.git'
+                )
+               }
+            }
+        }
+        stage("Unit Testing using Maven"){
+            when {expression {params.action == 'create'}}
+            steps{
+               script{
+                mvnTest()
+               }
+            }
+        }
+        // stage("Integration Testing using Maven"){
+        //     when {expression {params.action == 'create'}}
+        //     steps{
+        //        script{
+        //         mvnIntegrationTest()
+        //        }
+        //     }
+        // }
+        // stage('Static code analysis: Sonarqube'){
+        //  when { expression {  params.action == 'create' } }
+        //     steps{
+        //        script{
+                   
+        //            def sonarQubecredentialsId = 'sonar-token'
+        //            staticCodeAnalysis(sonarQubecredentialsId)
+        //        }
+        //     }
+        // }
+        // stage('Quality Gate Status Check : Sonarqube'){
+        //  when { expression {  params.action == 'create' } }
+        //     steps{
+        //        script{
+        //            //Qulity gate status check
+        //            def sonarQubecredentialsId = 'sonar-token'
+        //            qualityGateStatus(sonarQubecredentialsId)
+        //        }
+        //     }
+        // }
+        stage('Maven Build : maven'){
+         when { expression {  params.action == 'create' } }
+            steps{
+               script{
+                   
+                   mvnBuild()
+               }
+            }
+        }
+        stage('Docker Image Build :ECR'){
+         when { expression {  params.action == 'create' } }
+            steps{
+               script{
+                   
+                   dockerBuild("${params.awsAccoutId}", "${params.region}", "${params.ecrRepoName}")
+               }
+            }
+        }
+        stage('Docker Image Scan: trivy :ECR'){
+         when { expression {  params.action == 'create' } }
+            steps{
+               script{
+                   
+                   dockerImageScan("${params.awsAccoutId}", "${params.region}", "${params.ecrRepoName}")
+               }
+            }
+        }
+        stage('Docker Image Push : ECR '){
+         when { expression {  params.action == 'create' } }
+            steps{
+               script{
+                   dockerImagePush("${params.awsAccoutId}", "${params.region}", "${params.ecrRepoName}")
+                  }
+            }
+        }   
+        stage('Docker Image clean : ECR '){
+         when { expression {  params.action == 'create' } }
+            steps{
+               script{
+                   dockerImageCleanup("${params.awsAccoutId}", "${params.region}", "${params.ecrRepoName}")
+                  }
+            }
+        }  
+    }    
+}      
