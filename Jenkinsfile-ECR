@@ -119,5 +119,3 @@ pipeline{
     }    
 }      
 
-        ACCESS_KEY = credentials('ACCESS_KEY_ID')
-        SECRET_KEY = credentials('SECRET_ACCESS_KEY')
