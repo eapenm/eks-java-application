@@ -1,0 +1,40 @@
+# Compiled class file
+*.class
+
+# Log files
+*.log
+logs/
+
+# Compiled files
+bin/
+target/
+build/
+
+# IDE files
+.idea/
+.project
+.classpath
+
+# Maven files
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+
+# Gradle files
+.gradle/
+build/
+
+# Terraform files
+.terraform/
+terraform.tfstate
+terraform.tfstate.backup
+*.tfplan
+
+# Jenkins files
+*.war
+*.ear
+*.jar

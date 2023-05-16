@@ -1,0 +1,172 @@
+@Library('eapen-shared-library') _
+pipeline{
+    agent any
+    parameters{
+        choice(name: 'action', choices: 'Create\ndelete', description: 'Choose Create/Destroy')
+        string(name: 'awsAccoutId',description: "AWS Account Id", defaultValue: '729398311642')
+        string(name: 'region',description: "AWS region name where we need to deploy", defaultValue: 'us-east-1')
+        string(name: 'ecrRepoName',description: "ECR Repository Name", defaultValue: 'javaapp')
+        string(name: 'cluster', description: "name of the EKS Cluster", defaultValue: 'ekscluster')
+    }
+    environment{
+        ACCESS_KEY = credentials('ACCESS_KEY_ID')
+        SECRET_KEY = credentials('SECRET_ACCESS_KEY')
+    }
+    stages{
+        stage("GIT Checkout"){
+            when {expression {params.action == 'Create'}}
+            steps{
+               script{
+                gitCheckout(
+                    branch: 'devops', 
+                    url: 'https://github.com/eapenm/eks-java-application.git'
+                )
+               }
+            }
+        }
+        stage("Unit Testing using Maven"){
+            when {expression {params.action == 'Create'}}
+            steps{
+               script{
+                mvnTest()
+               }
+            }
+        }
+        stage("Integration Testing using Maven"){
+            when {expression {params.action == 'Create'}}
+            steps{
+               script{
+                mvnIntegrationTest()
+               }
+            }
+        }
+        stage('Static code analysis: Sonarqube'){
+         when { expression {  params.action == 'Create' } }
+            steps{
+               script{
+                   
+                   def sonarQubecredentialsId = 'sonar-token'
+                   staticCodeAnalysis(sonarQubecredentialsId)
+               }
+            }
+        }
+        stage('Quality Gate Status Check : Sonarqube'){
+         when { expression {  params.action == 'Create' } }
+            steps{
+               script{
+                   //Qulity gate status check
+                   def sonarQubecredentialsId = 'sonar-token'
+                   qualityGateStatus(sonarQubecredentialsId)
+               }
+            }
+        }
+        stage('Maven Build : maven'){
+         when { expression {  params.action == 'Create' } }
+            steps{
+               script{
+                   
+                   mvnBuild()
+               }
+            }
+        }
+        stage('Docker Image Build :ECR'){
+         when { expression {  params.action == 'Create' } }
+            steps{
+               script{
+                   
+                   dockerBuild("${params.awsAccoutId}", "${params.region}", "${params.ecrRepoName}")
+               }
+            }
+        }
+        stage('Docker Image Scan: trivy :ECR'){
+         when { expression {  params.action == 'Create' } }
+            steps{
+               script{
+                   
+                   dockerImageScan("${params.awsAccoutId}", "${params.region}", "${params.ecrRepoName}")
+               }
+            }
+        }
+        stage('Docker Image Push : ECR '){
+         when { expression {  params.action == 'Create' } }
+            steps{
+               script{
+                   dockerImagePush("${params.awsAccoutId}", "${params.region}", "${params.ecrRepoName}")
+                  }
+            }
+        }   
+        stage('Docker Image clean : ECR '){
+         when { expression {  params.action == 'Create' } }
+            steps{
+               script{
+                   dockerImageCleanup("${params.awsAccoutId}", "${params.region}", "${params.ecrRepoName}")
+                  }
+            }
+        }  
+        stage('Create EKS Cluster : Terraform'){
+         when { expression {  params.action == 'Create' } }
+            steps{
+               script{
+                   dir('terraform'){
+                    sh """
+                       terraform init
+                       terraform plan -var 'access_key=$ACCESS_KEY' -var 'secret_key=$SECRET_KEY' -var 'region=${params.region}' 
+                       terraform apply -var 'access_key=$ACCESS_KEY' -var 'secret_key=$SECRET_KEY' -var 'region=${params.region}' -auto-approve
+                    """
+                   }
+                  }
+            }
+        } 
+        stage('Connect to EKS '){
+            when { expression {  params.action == 'Create' } }
+        steps{
+
+            script{
+
+                sh """
+                aws configure set aws_access_key_id "$ACCESS_KEY"
+                aws configure set aws_secret_access_key "$SECRET_KEY"
+                aws configure set region "${params.region}"
+                aws eks --region ${params.region} update-kubeconfig --name ${params.cluster}
+                """
+            }
+        }
+        }  
+        stage('Deployment on EKS Cluster'){
+            when { expression {  params.action == 'Create' } }
+            steps{
+                script{
+                  
+                  def apply = false
+
+                  try{
+                    input message: 'please confirm to deploy on eks', ok: 'Ready to apply the config ?'
+                    apply = true
+                  }catch(err){
+                    apply= false
+                    currentBuild.result  = 'UNSTABLE'
+                  }
+                  if(apply){
+
+                    sh """
+                      kubectl apply -f .
+                    """
+                  }
+                }
+            }
+        }  
+        stage('Tear down the infrastructure : Terraform'){
+         when { expression {  params.action == 'Create' } }
+            steps{
+               script{
+                   dir('terraform'){
+                    sh """
+                       terraform destroy -var 'access_key=$ACCESS_KEY' -var 'secret_key=$SECRET_KEY' -var 'region=${params.region}' -auto-approve
+                    """
+                   }
+                  }
+            }
+        } 
+    }    
+}      
+
