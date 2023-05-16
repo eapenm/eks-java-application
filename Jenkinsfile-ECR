@@ -6,7 +6,7 @@ pipeline{
         string(name: 'awsAccoutId',description: "AWS Account Id", defaultValue: '729398311642')
         string(name: 'region',description: "AWS region name where we need to deploy", defaultValue: 'us-east-1')
         string(name: 'ecrRepoName',description: "ECR Repository Name", defaultValue: 'javaapp')
-        string(name: 'cluster', description: "name of the EKS Cluster", defaultValue: 'demo-cluster1')
+        string(name: 'cluster', description: "name of the EKS Cluster", defaultValue: 'ekscluster')
     }
     environment{
         ACCESS_KEY = credentials('ACCESS_KEY_ID')
@@ -132,29 +132,29 @@ pipeline{
             }
         }
         }  
-                stage('Deployment on EKS Cluster'){
-            when { expression {  params.action == 'Create' } }
-            steps{
-                script{
+        // stage('Deployment on EKS Cluster'){
+        //     when { expression {  params.action == 'Create' } }
+        //     steps{
+        //         script{
                   
-                  def apply = false
+        //           def apply = false
 
-                  try{
-                    input message: 'please confirm to deploy on eks', ok: 'Ready to apply the config ?'
-                    apply = true
-                  }catch(err){
-                    apply= false
-                    currentBuild.result  = 'UNSTABLE'
-                  }
-                  if(apply){
+        //           try{
+        //             input message: 'please confirm to deploy on eks', ok: 'Ready to apply the config ?'
+        //             apply = true
+        //           }catch(err){
+        //             apply= false
+        //             currentBuild.result  = 'UNSTABLE'
+        //           }
+        //           if(apply){
 
-                    sh """
-                      kubectl apply -f .
-                    """
-                  }
-                }
-            }
-        }  
+        //             sh """
+        //               kubectl apply -f .
+        //             """
+        //           }
+        //         }
+        //     }
+        // }  
         stage('Tear down the infrastructure : Terraform'){
          when { expression {  params.action == 'Create' } }
             steps{
