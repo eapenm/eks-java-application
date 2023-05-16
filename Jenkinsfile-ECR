@@ -7,6 +7,10 @@ pipeline{
         string(name: 'region',description: "AWS region name where we need to deploy", defaultValue: 'us-east-1')
         string(name: 'ecrRepoName',description: "ECR Repository Name", defaultValue: 'javaapp')
     }
+    environment{
+        ACCESS_KEY = credentials('ACCESS_KEY_ID')
+        SECRET_KEY = credentials('SECRET_ACCESS_KEY')
+    }
     stages{
         stage("GIT Checkout"){
             when {expression {params.action == 'Create'}}
@@ -55,48 +59,65 @@ pipeline{
         //        }
         //     }
         // }
-        stage('Maven Build : maven'){
-         when { expression {  params.action == 'Create' } }
-            steps{
-               script{
+        // stage('Maven Build : maven'){
+        //  when { expression {  params.action == 'Create' } }
+        //     steps{
+        //        script{
                    
-                   mvnBuild()
-               }
-            }
-        }
-        stage('Docker Image Build :ECR'){
-         when { expression {  params.action == 'Create' } }
-            steps{
-               script{
+        //            mvnBuild()
+        //        }
+        //     }
+        // }
+        // stage('Docker Image Build :ECR'){
+        //  when { expression {  params.action == 'Create' } }
+        //     steps{
+        //        script{
                    
-                   dockerBuild("${params.awsAccoutId}", "${params.region}", "${params.ecrRepoName}")
-               }
-            }
-        }
-        stage('Docker Image Scan: trivy :ECR'){
-         when { expression {  params.action == 'Create' } }
-            steps{
-               script{
+        //            dockerBuild("${params.awsAccoutId}", "${params.region}", "${params.ecrRepoName}")
+        //        }
+        //     }
+        // }
+        // stage('Docker Image Scan: trivy :ECR'){
+        //  when { expression {  params.action == 'Create' } }
+        //     steps{
+        //        script{
                    
-                   dockerImageScan("${params.awsAccoutId}", "${params.region}", "${params.ecrRepoName}")
-               }
-            }
-        }
-        stage('Docker Image Push : ECR '){
+        //            dockerImageScan("${params.awsAccoutId}", "${params.region}", "${params.ecrRepoName}")
+        //        }
+        //     }
+        // }
+        // stage('Docker Image Push : ECR '){
+        //  when { expression {  params.action == 'Create' } }
+        //     steps{
+        //        script{
+        //            dockerImagePush("${params.awsAccoutId}", "${params.region}", "${params.ecrRepoName}")
+        //           }
+        //     }
+        // }   
+        // stage('Docker Image clean : ECR '){
+        //  when { expression {  params.action == 'Create' } }
+        //     steps{
+        //        script{
+        //            dockerImageCleanup("${params.awsAccoutId}", "${params.region}", "${params.ecrRepoName}")
+        //           }
+        //     }
+        // }  
+        stage('Create EKS Cluster : Terraform'){
          when { expression {  params.action == 'Create' } }
             steps{
                script{
-                   dockerImagePush("${params.awsAccoutId}", "${params.region}", "${params.ecrRepoName}")
-                  }
-            }
-        }   
-        stage('Docker Image clean : ECR '){
-         when { expression {  params.action == 'Create' } }
-            steps{
-               script{
-                   dockerImageCleanup("${params.awsAccoutId}", "${params.region}", "${params.ecrRepoName}")
+                   dir('terraform'){
+                    sh """
+                       terraform init
+                       terraform plan -var 'access_key=$ACCESS_KEY' -var secret_key=$SECRET_KEY' -var='region=${params.region}' 
+                       terraform apply -var 'access_key=$ACCESS_KEY' -var secret_key=$SECRET_KEY' -var='region=${params.region}' --auto-approve
+                    """
+                   }
                   }
             }
         }  
     }    
 }      
+
+        ACCESS_KEY = credentials('ACCESS_KEY_ID')
+        SECRET_KEY = credentials('SECRET_ACCESS_KEY')
